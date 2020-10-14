@@ -2,7 +2,6 @@
   <div id="app">
     
     <router-view/>
-    2222
   </div>
 </template>
 
