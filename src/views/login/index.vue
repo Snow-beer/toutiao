@@ -4,22 +4,24 @@
       <div class="login-head">
         <div class="logo"></div>
       </div>
-      <el-form class="login-form" ref="form" :model="user">
-        <el-form-item>
+      <el-form class="login-form" ref="form" :model="user" :rules="rules">
+        <el-form-item prop="mobile">
           <el-input v-model="user.mobile" placeholder="请输入手机号"></el-input>
         </el-form-item>
-        <el-form-item>
+        <el-form-item prop="code">
           <el-input v-model="user.code" placeholder="请输入验证码"></el-input>
         </el-form-item>
-        <el-form-item>
-          <el-checkbox v-model="checked"
+        <el-form-item prop='checked'>
+          <el-checkbox v-model="user.checked" 
             >我已阅读并同意用户协议和隐私条款</el-checkbox
           >
         </el-form-item>
         <el-form-item>
-          <el-button class="login-btn" 
-          :loading="loginloding"
-          type="primary" @click="onLogin"
+          <el-button
+            class="login-btn"
+            :loading="loginloding"
+            type="primary"
+            @click="onLogin"
             >登录</el-button
           >
         </el-form-item>
@@ -29,48 +31,74 @@
 </template>
 
 <script>
-import request from "@/utils/request.js";
+import { login } from '@/api/user'
 
 export default {
   name: "LoginIdex",
   components: {},
   data() {
-    return { 
+    return {
       user: {
         mobile: "13911111111",
         code: "246810",
+        checked: false,
       },
-      checked: false,
-      loginloding: false
+
+      loginloding: false,
+      rules: {
+        mobile: [{ required: true, message: "请输入手机号", trigger: "blur" }],
+        code: [{ required: true, message: "请输入验证码", trigger: "blur" }],
+        checked: [
+          {
+            validator: (rele, value, callback) => {
+              if (value) {
+                callback();
+              } else {
+                callback(new Error("请同意用户协议"));
+              }
+            },
+            trigger: 'change'
+          },
+        ],
+      },
     };
   },
   methods: {
+    //登陆btn点击事件
     onLogin() {
-      const user = this.user
-      this.loginloding = true
-      // 验证通过，提交登录
-      request({
-        method: "POST",
-        url: "/mp/v1_0/authorizations",
-        // data 用来设置 POST 请求体
-        data: user,
-      }).then((res) => {
-        // 登录成功
-        this.loginloding = false
-        console.log(res);
-        this.$message({
-          message: '恭喜你，这是一条成功消息',
-          type: 'success'
-        })
-        
-      }).catch(err =>{
-        this.loginloding = false
-        //登录失败
-        this.$message({
-          message: '请输入正确的账号验证码',
-          type: 'error'
-        })
+      const user = this.user;
+      //验证rules是否通过
+      this.$refs["form"].validate((valid) => {
+        if (!valid) {
+          //验证失败
+          return;
+        } else {
+          //验证通过
+          this.login();
+        }
       });
+    },
+
+    //登陆方法
+    login() {
+      this.loginloding = true;
+      // 验证通过，提交登录
+      login(this.user).then((res) => {
+          // 登录成功
+          this.loginloding = false;
+          this.$message({
+            message: "恭喜你，这是一条成功消息",
+            type: "success",
+          });
+        })
+        .catch((err) => {
+          this.loginloding = false;
+          //登录失败
+          this.$message({
+            message: "请输入正确的账号验证码",
+            type: "error",
+          });
+        });
     },
   },
 };
