@@ -28,12 +28,13 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="频道">
-          <el-select  placeholder="请选择活动区域" v-model="form.region">
-            <el-option 
-            :label="channel.name" 
-            :value="channel.id"
-            v-for="(channel, index) in channels"
-            :key="index"
+          <el-select placeholder="请选择活动区域" v-model="channelId">
+            <el-option label="全部" :value="null"> </el-option>
+            <el-option
+              :label="channel.name"
+              :value="channel.id"
+              v-for="(channel, index) in channels"
+              :key="index"
             ></el-option>
           </el-select>
         </el-form-item>
@@ -57,7 +58,7 @@
 
     <el-card class="box-card">
       <div slot="header" class="clearfix">
-        <span>根据条件工筛选到{{totalCount}}条结果</span>
+        <span>根据条件工筛选到{{ totalCount }}条结果</span>
       </div>
       <el-table
         :data="articles"
@@ -68,7 +69,13 @@
         <!-- 封面图片 -->
         <el-table-column prop="date" label="封面" width="180">
           <template slot-scope="scope">
-            <img :src="scope.row.cover.images[0]" class="f-image" alt="" />
+            <!-- <img :src="scope.row.cover.images[0]" class="f-image" alt="" /> -->
+            <el-image
+              style="width: 100px; height: 100px"
+              :src="scope.row.cover.images[0]"
+              fit="cover"
+              lazy
+            ></el-image>
           </template>
         </el-table-column>
         <!-- 封面图片结束 -->
@@ -140,25 +147,27 @@ export default {
         resource: "",
         desc: "",
       },
-      status: 0, 
+      status: 0,
       articles: [],
-      totalCount: 0,//数据数量
-      channels: [] //文章频道
+      totalCount: 0, //数据数量
+      channels: [], //文章频道
+      channelId: null,
     };
   },
   created() {
-    this.loadArticle(1)
-    this.loadChannels()
+    this.loadArticle(1);
+    this.loadChannels();
   },
   methods: {
     onQuery() {
       console.log("submit!");
     },
     loadArticle(page = 1) {
-      getArticle({ 
-          page ,
-          status: this.status
-          }).then((res) => {
+      getArticle({
+        page,
+        status: this.status,
+        channel_id: this.channelId,
+      }).then((res) => {
         const { results, total_count: totalcount } = res.data.data;
         // console.log(res.data)
         // this.articles = res.data.data.results;
@@ -172,11 +181,11 @@ export default {
       this.loadArticle(page);
     },
     // 获取文章频道
-    loadChannels(){
-        getArticlechannel().then((res) =>{
-            this.channels = res.data.data.channels
-        })
-    }
+    loadChannels() {
+      getArticlechannel().then((res) => {
+        this.channels = res.data.data.channels;
+      });
+    },
   },
 };
 </script>
