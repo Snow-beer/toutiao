@@ -46,7 +46,7 @@ export default {
   data() {
     return {
       user: {},
-      iscollapse: true,
+      iscollapse: false,
     };
   },
   components: {
@@ -56,7 +56,6 @@ export default {
     loadUserProfile() {
       getUserProfile().then((res) => {
         this.user = res.data.data;
-        console.log(this.user);
       });
     },
     logout() {
