@@ -6,6 +6,7 @@
     text-color="#fff"
     active-text-color="#ffd04b"
     router
+    :collapse='iscollapse'
   >
     <el-menu-item index="/">
       <i class="el-icon-setting"></i>
@@ -39,7 +40,14 @@
 </template>
 
 <script>
-export default {};
+export default {
+  data(){
+    return{
+      
+    }
+  },
+  props: ['iscollapse']
+};
 </script>
 
 <style>

@@ -86,10 +86,13 @@ export default {
       login(this.user).then((res) => {
           // 登录成功
           this.loginloding = false;
+          //储存本地loken
+          window.localStorage.setItem('user', JSON.stringify(res.data.data))
           this.$message({
             message: "恭喜你，这是一条成功消息",
             type: "success",
           });
+          this.$router.push({ name : 'home'})
         })
         .catch((err) => {
           this.loginloding = false;

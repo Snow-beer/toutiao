@@ -16,13 +16,11 @@ const routes = [{
     path: '/',
     name: '',
     component: Layout,
-    children: [
-      {
-        path: '',
-        name: 'home',
-        component: Home
-      }
-    ]
+    children: [{
+      path: '',
+      name: 'home',
+      component: Home
+    }]
   }
 ]
 
@@ -31,5 +29,22 @@ const router = new VueRouter({
   // base: process.env.BASE_URL,
   routes
 })
+router.beforeEach((to, from, next) => {
+  //获取本地缓存token
+  const user = JSON.parse(window.localStorage.getItem('user'))
+  //判断是否从登录页面登录
+  if(to.path !== '/login'){
+    if(user){
+      next()
+    }else{
+      next('/login')
+    }
+    
+  }else{
+    next()
+  }
+  // next()
+})
+
 
 export default router
