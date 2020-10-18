@@ -41,7 +41,7 @@
         <el-form-item label="时间">
           <el-time-picker
             is-range
-            v-model="form.date1"
+            v-model="rangeDate"
             range-separator="至"
             start-placeholder="开始时间"
             end-placeholder="结束时间"
@@ -50,7 +50,9 @@
           </el-time-picker>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" @click="loadArticle(1)">查询</el-button>
+          <el-button type="primary" @click="loadArticle(1)" :disabled="loading"
+            >查询</el-button
+          >
         </el-form-item>
       </el-form>
       <!-- 表单结束 -->
@@ -65,6 +67,7 @@
         style="width: 100%"
         size="mini"
         class="list-table"
+        v-loading="loading"
       >
         <!-- 封面图片 -->
         <el-table-column prop="date" label="封面" width="180">
@@ -102,7 +105,7 @@
 
         <el-table-column prop="pubdate" label="发布时间"> </el-table-column>
         <el-table-column prop="title" label="操作" width="180">
-          <template>
+          <template slot-scope="scope">
             <el-button
               size="mini"
               circle
@@ -114,6 +117,7 @@
               type="danger"
               icon="el-icon-delete"
               size="mini"
+              @click="handleDelete(scope.row.id)"
             ></el-button>
           </template>
         </el-table-column>
@@ -124,6 +128,8 @@
         layout="prev, pager, next"
         :total="totalCount"
         background
+        :disabled="loading"
+        :current-page.sync="page"
         @current-change="currentChange"
       >
       </el-pagination>
@@ -132,7 +138,7 @@
 </template>
 
 <script>
-import { getArticle, getArticlechannel } from "@/api/article";
+import { getArticle, getArticlechannel, deleteArticle } from "@/api/article";
 
 export default {
   data() {
@@ -147,11 +153,14 @@ export default {
         resource: "",
         desc: "",
       },
-      status: 0,
+      status: null,
       articles: [],
       totalCount: 0, //数据数量
       channels: [], //文章频道
       channelId: null,
+      rangeDate: null,
+      loading: true,
+      page: 1
     };
   },
   created() {
@@ -163,16 +172,20 @@ export default {
       console.log("submit!");
     },
     loadArticle(page = 1) {
+      this.loading = true;
       getArticle({
         page,
         status: this.status,
         channel_id: this.channelId,
+        begin_pubdate: this.rangeDate ? this.rangeDate[0] : null,
+        end_pubdate: this.rangeDate ? this.rangeDate[1] : null,
       }).then((res) => {
         const { results, total_count: totalcount } = res.data.data;
         // console.log(res.data)
         // this.articles = res.data.data.results;
         this.articles = results;
         this.totalCount = totalcount;
+        this.loading = false;
       });
     },
     // 分页事件
@@ -185,6 +198,31 @@ export default {
       getArticlechannel().then((res) => {
         this.channels = res.data.data.channels;
       });
+    },
+    // 删除文章
+    handleDelete(articleId) {
+      this.$confirm("确认删除吗？", "删除提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          // 确认执行这里
+          deleteArticle(articleId.toString()).then((res) => {
+            this.loadArticle(this.page)
+            console.log(1)
+            this.$message({
+              message: "删除成功",
+              type: "success",
+            });
+          });
+        })
+        .catch(() => {
+          this.$message({
+            type: "info",
+            message: "已取消删除",
+          });
+        });
     },
   },
 };

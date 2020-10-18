@@ -14,3 +14,10 @@ export const getArticlechannel = () =>{
         url: '/mp/v1_0/channels'
     })
 }
+
+export const deleteArticle = articleId =>{
+    return request({
+        method: 'DELETE',
+        url: `/mp/v1_0/articles/${articleId}`
+    })
+}
