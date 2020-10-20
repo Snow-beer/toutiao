@@ -12,7 +12,7 @@
       </div>
       <!--  -->
       <div style="padding-bottom: 20px" class="flex-box">
-        <el-radio-group v-model="collect" size="mini" @change="onCollectChange">
+        <el-radio-group v-model="collect" size="mini" @change="loadImage(1)">
           <el-radio-button :label="false">全部</el-radio-button>
           <el-radio-button :label="true">收藏</el-radio-button>
         </el-radio-group>
@@ -36,25 +36,34 @@
             :src="item.url"
             fit="cover"
           ></el-image>
+          <div class="image-action">
+            <i class="el-icon-star-on"></i>
+            <i class="el-icon-delete-solid"></i>
+          </div>
         </el-col>
       </el-row>
     </el-card>
+    <el-pagination background 
+    :total='totalCount'
+    @current-change	='handlepage'
+    :current-page	='this.page'
+    layout="prev, pager, next" >
+    </el-pagination>
     <!-- 上传对话框 -->
     <el-dialog
       title="提示"
       :visible.sync="dialogVisible"
       width="30%"
       append-to-body
-     
     >
       <el-upload
         class="upload-demo"
         drag
         action="http://ttapi.research.itcast.cn/mp/v1_0/user/images"
         multiple
-        :headers='uploadHeader'
+        :headers="uploadHeader"
         name="image"
-        :on-success='onUploadSucess'
+        :on-success="onUploadSucess"
       >
         <i class="el-icon-upload"></i>
         <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
@@ -77,27 +86,39 @@ export default {
       image: [],
       dialogVisible: false,
       uploadHeader: {
-        Authorization: `Bearer ${JSON.parse(window.localStorage.getItem('user')).token}`
-      }
+        Authorization: `Bearer ${
+          JSON.parse(window.localStorage.getItem("user")).token
+        }`,
+      },
+      page: 1,
+      totalCount: 0
     };
   },
   created() {
-    this.loadImage();
+    this.loadImage(1);
   },
   methods: {
-    loadImage(collect = false) {
+    loadImage( page) {
+      this.page = page
       getImage({
-        collect,
+        collect:this.collect ,
+        page,
+        per_page: 10,
       }).then((res) => {
         this.image = res.data.data.results;
+        // console.log(res)
+        this.totalCount = res.data.data.total_count;
       });
     },
-    onCollectChange(value) {
-      this.loadImage(value);
+    // 上传时的更新
+    onUploadSucess() {
+      this.dialogVisible = false;
+      this.loadImage(false);
     },
-    onUploadSucess(){
-      this.dialogVisible = false
-      this.loadImage(false)
+    // 翻页时的更新
+    handlepage(value){
+      console.log(value)
+      this.loadImage(value)
     }
   },
 };
@@ -106,10 +127,40 @@ export default {
 <style scoped lang='less'>
 .img-boder {
   padding: 15px;
-  border: 1px dashed;
+  position: relative;
+  // border: 1px dashed;
 }
 .flex-box {
   display: flex;
   justify-content: space-between;
+  position: relative;
 }
+.image-action{
+  position: absolute;
+  display: flex;
+  justify-content: space-between;
+}
+// .action-head {
+//   padding-bottom: 20px;
+//   display: flex;
+//   justify-content: space-between;
+// }
+
+.image-item {
+  position: relative;
+}
+
+// .image-action {
+//   font-size: 25px;
+//   display: flex;
+//   justify-content: space-evenly;
+//   align-items: center;
+//   color: #fff;
+//   height: 40px;
+//   background-color: rgba(204, 204, 204, .5);
+//   position: absolute;
+//   bottom: 4px;
+//   left: 5px;
+//   right: 5px;
+// }
 </style>
