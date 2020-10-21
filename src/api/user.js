@@ -24,3 +24,11 @@ export const getUserProfile = () => {
     // }
   })
 }
+// 编辑用户资料
+export const editUser = (data) =>{
+  return request({
+    url: '/mp/v1_0/user/profile',
+    method: 'PATCH',
+    data
+  })
+}
