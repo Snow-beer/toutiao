@@ -3,7 +3,7 @@ import JSONbig from 'json-bigint'
 import router from '@/router'
 
 const request = axios.create({
-    baseURL: 'http://ttapi.research.cn/',  // 请求的基础路径
+    baseURL: 'http://112.74.99.5:3000',  // 请求的基础路径
     transformResponse: [function (data){
       try {
         // 如果转换成功，则直接把结果返回
